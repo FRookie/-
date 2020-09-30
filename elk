@@ -1,0 +1,278 @@
+elasticsearch :
+	
+	Pull:
+
+		docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 
+	
+	Run:
+		docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+		
+		docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "cluster.initial_master_nodes: ["node-1"]"（解决kibana启动错误） --name elasticsearch4 docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+		
+		ISSUES:
+		
+		1.Elasticsearch container 启动后，并且也设置了端口映射，但还是无法在宿主机
+		浏览器访问9200端口，此时需要检查elasticsearch.yml是否配置了跨域：
+				http.cors.enabled: true
+				http.cors.allow-origin: "*"
+				PS:7.0之后似乎默认已配置
+		
+		
+		
+		
+	1. Create a docker-compose.yml file:(集群配置3个实例)
+	
+		version: '2.2'
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data03:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+		volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+  data03:
+    driver: local
+		networks:
+  elastic:
+    driver: bridge
+--------------------------------------------------------------------------------------------------------------
+Kibana:
+
+
+Pull：
+
+	docker pull docker.elastic.co/kibana/kibana:7.8.0
+	
+	
+	
+run：
+
+	docker run --link YOUR_ELASTICSEARCH_CONTAINER_NAME_OR_ID:elasticsearch -p 5601:5601 {docker-repo}:{version}
+	
+	启动kibana出错：
+	
+		the default discovery settings are unsuitable for production use; at least one of [discovery.seed_hosts, discovery.seed_providers, cluster.initial_master_nodes] must be configured
+		
+	解决办法：
+		由于kibana是基于elasticsearch建立的，因此在启动elasticsearch container时需配置环境变量
+		
+		docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "cluster.initial_master_nodes: ["node-1"]" --name elasticsearch4 docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+		
+		
+		
+	Template:
+	
+		#创建索引（index）conference，类型（Type）event，ID为2 
+		PUT /conference/event/2
+		{
+		  "host": "Dave",
+		  "title": "Elasticsearch at Rangespan and Exonar",
+		  "description": "Representatives from Rangespan and Exonar will come and discuss how they use Elasticsearch",
+		  "attendees": ["Dave", "Andrew", "David", "Clint"],
+		  "date": "2013-06-24T18:30",
+		  "reviews": 4
+		}
+		
+		#查询document
+		GET /conference/event/1 
+		
+		#删除document
+		DELETE /conference/event/1
+		
+		#不指定id，会自动生成随机码
+		POST /conference/event/
+		{
+		  "host": "Dave",
+		  "title": "Elasticsearch at Rangespan and Exonar",
+		  "description": "Representatives from Rangespan and Exonar will come and discuss how they use Elasticsearch",
+		  "attendees": ["Dave", "Andrew", "David", "Clint"],
+		  "date": "2013-06-24T18:30",
+		  "reviews": 4
+		}
+		
+		POST /conference/event/
+		{
+		  "host": "Coin",
+		  "title": "Elasticsearch at Rangespan and Exonar",
+		  "description": "Representatives from Rangespan and Exonar will come and discuss how they use Elasticsearch",
+		  "attendees": ["你好","我好","大家好","skr"],
+		  "date": "2013-06-24T18:30",
+		  "reviews": 4
+		}
+		
+		#查询所有
+		GET /conference/event/_search
+		
+		#关键字查询
+		GET /conference/event/_search
+		{
+		  "query":{
+		    "match": {
+		      "attendees" : "skr"   --字段
+		    },
+		  "size":2
+		  }
+		}
+		
+		#多字段查询
+		GET /project_*_dev/_doc/_search 
+		{
+		  "query": {
+		    "bool": {
+		      "should":[
+		        {"match":
+		          {"product_manager":"xxxxx"}
+		        },
+		        {"match":
+		          {"department_head":"xxxx"}
+		        }
+		      ]
+		    }
+		  }
+		}
+		#多字段查询
+		GET /project_*_dev/_doc/_search 
+		{
+		  "query": {
+		    "bool": {
+		      
+		      "must":{
+		        "range":{
+		          "pmcs_bu_end_dt" :{
+		            "from":"2020-08-20",
+		            "to":"2020-08-30",
+		            "include_lower" : true,
+		            "include_upper" : true
+		          }
+		        }  
+		      }
+		      
+		    }
+		  },
+		    "size":"88"
+		}
+		
+-------------------------------------------------------------------------------------------------------------
+Logstash:
+
+pull：
+
+	docker pull docker.elastic.co/logstash/logstash:7.8.0
+	
+	来自 <https://www.elastic.co/guide/en/logstash/current/docker.html> 
+	
+	
+	docker run -p 5044:5044 -p 9600:9600 -e xpack.monitoring.elasticsearch.hosts=http://10.41.86.129:9200/ -e http.host=0.0.0.0  --name logstash4 docker.elastic.co/logstash/logstash:7.4.0
+	（本地监听必须指定本机物理IP，否则访问不到elasticsearch）
+	
+	docker exec -u 0 -it  logstash4 bash   
+	
+	docker exec -it logstash4 /bin/bash（进入container修改配置（此处以logstash用户登录））
+	
+	下载插件：
+	bin/logstash-plugin install logstash-input-jdbc
+	 bin/logstash-plugin install logstash-output-elasticsearch
+	
+	修改脚本文件
+		input {
+		  jdbc {
+		    jdbc_driver_library => "/usr/share/logstash/postgres/postgresql-42.2.6.jar"
+		    jdbc_driver_class => "org.postgresql.Driver"
+		    jdbc_connection_string => "jdbc:postgresql://xxxxxxx:5432/smartplm"
+		    jdbc_user => "smartplm@dev"
+		    jdbc_password => "smartplm@dev"
+		    schedule => "* * * * *"
+		    statement => "select * from projectmgmt.form_master"
+		    use_column_value => true
+		    tracking_column_type => "int4"
+		    tracking_column => "seq_no"
+		    last_run_metadata_path => "syncpoint_table"
+		  }
+		}
+		output {
+		    elasticsearch {
+		        # ES的IP地址及端口
+		        hosts => ["xxxxxxxx:9200"]
+		        # 索引名称 可自定义
+		        index => "form_master"
+		        # 需要关联的数据库中要有一个seq_no字段，对应类型中的seq_no
+		        document_id => "%{seq_no}"
+		        document_type => "form"
+		    }
+		    stdout {
+		        # JSON格式输出
+		        codec => json_lines
+		    }
+		}
+		
+	修改脚本文件后启动命令 
+		./bin/logstash -f XXX.conf
+	
+	https://www.cnblogs.com/shixiuxian/p/12460799.html
+	
+	修改配置文件 logstash.yml:
+		// 0.0.0.0：允许任何IP访问
+http.host: "0.0.0.0"
+// 配置elasticsearch集群地址
+xpack.monitoring.elasticsearch.hosts: [ "http://xxxxx:9200","http://xxxx:9200","http://xxxxx:9200" ]
+// 允许监控
+xpack.monitoring.enabled: true
+// 启动时读取配置文件指定
+path.config: /usr/share/logstash/postgres/postgres.conf
+// 指定的该文件可以配置Logstash读取一些文件导入ES
+-----------------------------------------------------------------------------------------------------------------
