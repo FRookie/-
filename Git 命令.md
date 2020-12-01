@@ -1,6 +1,6 @@
 ##命令
 ---
-id: git-command
+id: git-commands
 title: Git command Doc
 sidebar_label: Git command Doc
 ---
