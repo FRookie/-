@@ -5,7 +5,7 @@
 
 [Linux 命令和骚操作](https://github.com/FRookie/My-Grocery-Store/blob/master/linux%20%E5%91%BD%E4%BB%A4%E5%92%8C%E9%AA%9A%E6%93%8D%E4%BD%9C)
 
-Kafka 配置
+[Kafka 配置](https://github.com/FRookie/My-Grocery-Store/blob/master/kafka)
 
 分布式锁 介绍
 
