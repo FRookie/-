@@ -1,4 +1,5 @@
-## ubuntu安装方法
+# Ubuntu
+## thefuck 命令
 
     sudo apt update
     sudo apt install python3-dev python3-pip python3-setuptools
