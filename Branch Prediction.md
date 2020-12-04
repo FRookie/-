@@ -50,3 +50,5 @@
       }
       
 ![结果对比](https://github.com/FRookie/My-Grocery-Store/blob/master/picture/differ.png)
+
+[参考传送门](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array#comment111021676_11227902)
