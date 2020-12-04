@@ -38,7 +38,7 @@
             // Primary loop
             for (int c = 0; c < arraySize; ++c)
             {
-              if (data[c] >= 128)
+              if (data[c] >= 128)	#分支预测点if语句
                 sumSort += data[c];
             }
           }
