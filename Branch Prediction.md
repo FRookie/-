@@ -49,4 +49,4 @@
         }
       }
       
-      ![结果对比](https://github.com/FRookie/My-Grocery-Store/blob/master/picture/differ.PNG)
+![结果对比](https://github.com/FRookie/My-Grocery-Store/blob/master/picture/differ.PNG)
