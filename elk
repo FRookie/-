@@ -218,7 +218,7 @@ pull：
 	来自 <https://www.elastic.co/guide/en/logstash/current/docker.html> 
 	
 	
-	docker run -p 5044:5044 -p 9600:9600 -e xpack.monitoring.elasticsearch.hosts=http://10.41.86.129:9200/ -e http.host=0.0.0.0  --name logstash4 docker.elastic.co/logstash/logstash:7.4.0
+	docker run -p 5044:5044 -p 9600:9600 -e xpack.monitoring.elasticsearch.hosts=http://xxxx:9200/ -e http.host=0.0.0.0  --name logstash4 docker.elastic.co/logstash/logstash:7.4.0
 	（本地监听必须指定本机物理IP，否则访问不到elasticsearch）
 	
 	docker exec -u 0 -it  logstash4 bash   
@@ -234,11 +234,11 @@ pull：
 		  jdbc {
 		    jdbc_driver_library => "/usr/share/logstash/postgres/postgresql-42.2.6.jar"
 		    jdbc_driver_class => "org.postgresql.Driver"
-		    jdbc_connection_string => "jdbc:postgresql://xxxxxxx:5432/smartplm"
-		    jdbc_user => "smartplm@dev"
-		    jdbc_password => "smartplm@dev"
+		    jdbc_connection_string => "jdbc:postgresql://xxxxxxx:5432/smartXX"
+		    jdbc_user => "smartXXX"
+		    jdbc_password => "smartXXX"
 		    schedule => "* * * * *"
-		    statement => "select * from projectmgmt.form_master"
+		    statement => "select * from XXX"
 		    use_column_value => true
 		    tracking_column_type => "int4"
 		    tracking_column => "seq_no"
