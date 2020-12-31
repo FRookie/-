@@ -1,5 +1,6 @@
 启动sebp/elk遇到的问题以及解决方案：
-	1：ERROR: [1] bootstrap checks failed
+	Windows Docker镜像中的ElasticSearch vm最大映射数
+	1.ERROR: [1] bootstrap checks failed
 		[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
 	  
 	  解决办法：
