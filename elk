@@ -1,3 +1,14 @@
+启动sebp/elk遇到的问题以及解决方案：
+	1：ERROR: [1] bootstrap checks failed
+		[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+	  
+	  解决办法：
+	  	打开CMD终端，执行一下命令来设置docker的内存分配：
+			wsl -d docker-desktop
+			sysctl -w vm.max_map_count=262144
+
+=======================================================================================================================
+
 elasticsearch :
 	
 	Pull:
